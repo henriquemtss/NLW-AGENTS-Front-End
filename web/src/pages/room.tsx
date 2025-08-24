@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { QuestionForm } from '@/components/question-form'
 import { QuestionList } from '@/components/question-list'
 import { Button } from '@/components/ui/button'
-import { QuestionItem } from '@/components/question-item'
+
 
 type RoomParams = {
   roomId: string
@@ -41,13 +41,6 @@ export function Room() {
             Faça perguntas e receba respostas com IA
           </p>
         </div>
-
-        {/* <QuestionItem 
-            question={{
-                id: '1',
-                question: 'test',
-                createdAt: new Date().toISOString(),
-            }}/> */}
 
         <div className="mb-8">
           <QuestionForm roomId={params.roomId} />

@@ -1,27 +1,50 @@
 import { Button } from "@/components/ui/button";
 import { useRef, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
 import { record } from "zod";
 
-const isRecordingSupported = 
+const isRecordingSupported =
     !!navigator.mediaDevices &&
     typeof navigator.mediaDevices.getUserMedia === 'function' &&
     typeof window.MediaRecorder === 'function'
 
+type RoomParams = {
+    roomId: string
+}
 
 export function RecordRoomAudio() {
+    const params = useParams<RoomParams>()
+
     const [isRecording, setIsRecording] = useState(false)
     const recorder = useRef<MediaRecorder | null>(null)
 
     function stopRecording() {
         setIsRecording(false)
 
-        if (recorder.current && recorder.current.state != 'inactive'){
+        if (recorder.current && recorder.current.state != 'inactive') {
             recorder.current.stop()
         }
     }
 
-    async function startRecording(){
-        if (!isRecordingSupported){
+    async function uploadAudio(audio: Blob) {
+        const formData = new FormData()
+
+        formData.append('file', audio, 'audio.webm')
+
+        const response = await fetch(`http://localhost:3333/rooms/${params.roomId}/audio`, {
+            method: 'POST', 
+            body: formData,
+        })
+        
+        const result = await response.json()
+
+        console.log(result);
+        
+        
+    }
+
+    async function startRecording() {
+        if (!isRecordingSupported) {
             alert('O seu navegador não suporta gravação')
             return
         }
@@ -35,7 +58,7 @@ export function RecordRoomAudio() {
                 sampleRate: 44_100,
             },
         })
-        
+
         recorder.current = new MediaRecorder(audio, {
             mimeType: 'audio/webm',
             audioBitsPerSecond: 64_000,
@@ -43,7 +66,7 @@ export function RecordRoomAudio() {
 
         recorder.current.ondataavailable = event => {
             if (event.data.size > 0) {
-                console.log(event.data);  
+                uploadAudio(event.data)
             }
         }
 
@@ -58,11 +81,15 @@ export function RecordRoomAudio() {
         recorder.current.start()
     }
 
+    if (!params.roomId) {
+        return <Navigate replace to="/" />
+    }
+
     return (
-        <div className="flex h-screen items-center justify-center gap-3"> 
+        <div className="flex h-screen items-center justify-center gap-3">
             {isRecording ? (
                 <Button onClick={stopRecording}>Pausar gravação</Button>
-            ): (
+            ) : (
                 <Button onClick={startRecording}>Gravar áudio</Button>
             )}
             {isRecording ? <p>Gravando...</p> : <p>Pausado...</p>}
