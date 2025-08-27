@@ -7,7 +7,7 @@ interface Question {
   question: string
   answer?: string | null
   createdAt: string
-//   isGeneratingAnswer?: boolean
+  isGeneratingAnswer?: boolean
 }
 
 interface QuestionItemProps {
@@ -35,6 +35,7 @@ export function QuestionItem({ question }: QuestionItemProps) {
           </div>
 
           
+            {(!!question.answer || question.isGeneratingAnswer) && (
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
                 <div className="flex size-8 items-center justify-center rounded-full bg-primary/10">
@@ -46,21 +47,22 @@ export function QuestionItem({ question }: QuestionItemProps) {
                   Resposta da IA
                 </p>
                 <div className="text-muted-foreground">
-                  
+                  {question.isGeneratingAnswer ? (
                     <div className="flex items-center space-x-2">
                       <Loader2 className="size-4 animate-spin text-primary" />
                       <span className="text-primary text-sm italic">
                         Gerando resposta...
                       </span>
                     </div>
-                
+                  ) : (
                     <p className="whitespace-pre-line text-sm leading-relaxed">
                       {question.answer}
                     </p>
-                  
+                  )}
                 </div>
               </div>
             </div>
+          )}
           
 
           <div className="flex justify-end">
